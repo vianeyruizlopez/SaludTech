@@ -18,6 +18,15 @@ const getById = async (req, res) => {
   }
 };
 
+const create = async (req, res) => {
+  try {
+    const newUser = await usuarioService.create(req.body);
+    res.status(201).json(newUser);
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+};
+
 const update = async (req, res) => {
   try {
     const user = await usuarioService.update(req.params.id, req.body);
@@ -36,4 +45,4 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getById, update, remove };
+module.exports = { getAll, getById, create, update, remove };

@@ -1,24 +1,21 @@
-const mysql2 = require('mysql2/promise');
+const { Pool } = require('pg');
 require('dotenv').config();
 
-const pool = mysql2.createPool({
+const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'enfermeria_al_dia',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
+  port: process.env.DB_PORT || 5432, 
+  user: process.env.DB_USER || 'postgres', 
+  password: process.env.DB_PASSWORD || 'root',
+  database: process.env.DB_NAME || 'SaludTech', 
 });
 
 const testConnection = async () => {
   try {
-    const conn = await pool.getConnection();
-    console.log('Conexión a MySQL establecida correctamente');
-    conn.release();
+    const client = await pool.connect();
+    console.log(' Conexión a PostgreSQL establecida correctamente');
+    client.release();
   } catch (error) {
-    console.error('❌ Error al conectar a MySQL:', error.message);
+    console.error(' Error al conectar a PostgreSQL:', error.message);
     process.exit(1);
   }
 };

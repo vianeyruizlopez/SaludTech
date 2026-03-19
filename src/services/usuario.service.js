@@ -8,14 +8,24 @@ const getById = async (id) => {
   return user;
 };
 
+const create = async (userData) => {
+  const existingUser = await usuarioRepo.findByEmail(userData.email);
+  if (existingUser) throw { status: 400, message: 'El email ya está registrado' };
+
+  // Aquí podrías encriptar la contraseña si no viene de Firebase
+  // userData.password_hash = await bcrypt.hash(userData.password, 10);
+
+  return usuarioRepo.create(userData);
+};
+
 const update = async (id, data) => {
-  await getById(id);
+  await getById(id); 
   return usuarioRepo.update(id, data);
 };
 
 const remove = async (id) => {
-  await getById(id);
+  await getById(id); 
   await usuarioRepo.remove(id);
 };
 
-module.exports = { getAll, getById, update, remove };
+module.exports = { getAll, getById, create, update, remove };

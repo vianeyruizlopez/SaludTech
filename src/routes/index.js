@@ -51,4 +51,28 @@ router.patch('/turnos/:id/finalizar', verifyToken, turnoController.finalizar);
 router.get('/turnos', verifyToken, turnoController.getAll);
 router.get('/usuarios/:id/turnos', verifyToken, turnoController.getByUsuario);
 
+
+router.get('/rh/exportar/pdf', 
+  verifyToken, 
+  authorizeRoles('RH'), 
+  usuarioController.exportPDF
+);
+
+router.get('/rh/exportar/xls', 
+  verifyToken, 
+  authorizeRoles('RH'), 
+  usuarioController.exportExcel
+);
+
+router.get('/rh/auditoria/incidentes', 
+  verifyToken, 
+  authorizeRoles('RH', 'Supervisor'), 
+  notaController.getIncidentes
+);
+
+router.get('/rh/exportar/pdf', 
+  verifyToken, 
+  authorizeRoles('RH'), 
+  usuarioController.exportPDF
+);
 module.exports = router;

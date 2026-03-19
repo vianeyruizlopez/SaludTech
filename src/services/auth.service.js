@@ -13,18 +13,30 @@ const generateJWT = (user) => {
   );
 };
 
-// ─── Registro con email/password ─────────────────────────────────────────────
-const register = async ({ nombre_completo, email, password, telefono, rol }) => {
+// ─── Registro con email/password (Actualizado para RH) ────────────────────────
+const register = async ({ nombre_completo, email, password, telefono, rol, curp, turno_asignado }) => {
   const existing = await usuarioRepo.findByEmail(email);
   if (existing) throw { status: 409, message: 'El email ya está registrado' };
 
+  // Encriptamos la contraseña
   const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
-  const newUser = await usuarioRepo.create({ nombre_completo, email, password_hash, telefono, rol });
+
+  // Pasamos el CURP (en mayúsculas) y el Turno al repositorio
+  const newUser = await usuarioRepo.create({ 
+    nombre_completo, 
+    email, 
+    password_hash, 
+    telefono, 
+    rol,
+    curp: curp ? curp.toUpperCase() : null,
+    turno_asignado 
+  });
+
   const token = generateJWT(newUser);
   return { user: newUser, token };
 };
 
-// ─── Login con email/password ─────────────────────────────────────────────────
+// ─── Login con email/password (Se queda igual, funciona perfecto) ──────────────
 const login = async ({ email, password }) => {
   const user = await usuarioRepo.findByEmail(email);
   if (!user) throw { status: 401, message: 'Credenciales inválidas' };
@@ -48,13 +60,16 @@ const loginWithFirebase = async (idToken) => {
   }
 
   const { email, name: nombre_completo, uid } = decoded;
-
   let user = await usuarioRepo.findByEmail(email);
 
-  // Crear usuario en MySQL si no existe (primer login OAuth)
   if (!user) {
     const password_hash = await bcrypt.hash(uid + Date.now(), SALT_ROUNDS);
-    user = await usuarioRepo.create({ nombre_completo: nombre_completo || email, email, password_hash });
+    // Para usuarios de Firebase, el CURP y Turno se pueden editar después en el panel de RH
+    user = await usuarioRepo.create({ 
+        nombre_completo: nombre_completo || email, 
+        email, 
+        password_hash 
+    });
   }
 
   if (!user.activo) throw { status: 403, message: 'Cuenta desactivada' };

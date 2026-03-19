@@ -1,6 +1,8 @@
 const usuarioRepo = require('../repositories/usuario.repository');
 
-const getAll = async () => usuarioRepo.findAll();
+const getAll = async () => {
+  return await usuarioRepo.findAll();
+};
 
 const getById = async (id) => {
   const user = await usuarioRepo.findById(id);
@@ -9,23 +11,46 @@ const getById = async (id) => {
 };
 
 const create = async (userData) => {
+  // 1. Verificamos si el email ya existe para no duplicar
   const existingUser = await usuarioRepo.findByEmail(userData.email);
   if (existingUser) throw { status: 400, message: 'El email ya está registrado' };
 
-  // Aquí podrías encriptar la contraseña si no viene de Firebase
-  // userData.password_hash = await bcrypt.hash(userData.password, 10);
+  // 2. Limpieza de datos (CURP en Mayúsculas)
+  if (userData.curp) {
+    userData.curp = userData.curp.trim().toUpperCase();
+  }
 
-  return usuarioRepo.create(userData);
+  // 3. Validamos que el Rol sea válido antes de mandar al Repo
+  const rolesValidos = ['Enfermero', 'Supervisor', 'RH'];
+  if (userData.rol && !rolesValidos.includes(userData.rol)) {
+    userData.rol = 'Enfermero'; // Valor por defecto por seguridad
+  }
+
+  return await usuarioRepo.create(userData);
 };
 
 const update = async (id, data) => {
+  // 1. Verificamos que el usuario exista antes de intentar editarlo
   await getById(id); 
-  return usuarioRepo.update(id, data);
+  
+  // 2. Si viene un CURP nuevo, lo limpiamos
+  if (data.curp) {
+    data.curp = data.curp.trim().toUpperCase();
+  }
+
+  return await usuarioRepo.update(id, data);
 };
 
 const remove = async (id) => {
+  // Verificamos existencia antes de borrar
   await getById(id); 
   await usuarioRepo.remove(id);
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { 
+  getAll, 
+  getById, 
+  create, 
+  update, 
+  remove 
+};

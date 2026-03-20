@@ -28,4 +28,19 @@ const remove = async (id) => {
   await tareaRepo.remove(id);
 };
 
-module.exports = { getAll, getById, create, updateEstado, remove };
+// Función para el botón rápido del enfermero
+const toggleEstado = async (id) => {
+  const tarea = await getById(id);
+  // Si está completada la pasamos a Pendiente, si no, a Completada
+  const nuevoEstado = tarea.estado === 'Completada' ? 'Pendiente' : 'Completada';
+  return tareaRepo.updateEstado(id, nuevoEstado);
+};
+
+module.exports = { 
+  getAll, 
+  getById, 
+  create, 
+  updateEstado, 
+  remove, 
+  toggleEstado 
+};

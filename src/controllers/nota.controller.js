@@ -17,4 +17,14 @@ const create = async (req, res) => {
   } catch (err) { res.status(err.status || 500).json({ message: err.message }); }
 };
 
-module.exports = { getAll, getById, create };
+// --- Nueva función para Auditoría de RH ---
+const getIncidentes = async (req, res) => {
+  try {
+    const incidentes = await notaService.getIncidentes();
+    res.json(incidentes);
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+};
+
+module.exports = { getAll, getById, create, getIncidentes };

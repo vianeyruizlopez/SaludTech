@@ -18,8 +18,13 @@ const create = async (req, res) => {
 };
 
 const updateEstado = async (req, res) => {
-  try { res.json(await tareaService.updateEstado(req.params.id, req.body.estado)); }
-  catch (err) { res.status(err.status || 500).json({ message: err.message }); }
+  try {
+    // Si viene un estado en el body se usa, si no, se hace el toggle automático
+    const result = req.body.estado 
+      ? await tareaService.updateEstado(req.params.id, req.body.estado)
+      : await tareaService.toggleEstado(req.params.id);
+    res.json(result);
+  } catch (err) { res.status(err.status || 500).json({ message: err.message }); }
 };
 
 const remove = async (req, res) => {
